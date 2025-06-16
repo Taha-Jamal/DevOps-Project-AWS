@@ -2,7 +2,6 @@
 
 This project implements a fully automated DevOps pipeline using Jenkins (in Docker) that provisions AWS infrastructure with Terraform, configures it with Ansible, and deploys a static web application. This README documents both the setup process and implementation details.
 
-![Project Diagram](Project.png)
 
 ## 🚀 Technology Stack
 
