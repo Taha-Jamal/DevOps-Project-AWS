@@ -1,13 +1,16 @@
-# DevOps Mega Project: Automated Infrastructure Pipeline
+# DevOps Mega Project: AWS Infrastructure Pipeline
 
-This project implements a fully automated DevOps pipeline using Jenkins (in Docker) that provisions Azure infrastructure with Terraform, configures it with Ansible, and deploys a static web application. This README documents both the setup process and the challenges we encountered along the way.
+This project implements a fully automated DevOps pipeline using Jenkins (in Docker) that provisions AWS infrastructure with Terraform, configures it with Ansible, and deploys a static web application. This README documents both the setup process and implementation details.
 
 ![Project Diagram](Project.png)
 
 ## 🚀 Technology Stack
 
-- **Docker** - Containerized Jenkins with all required tools
-- **Jenkins** - Pipeline automation
+- **Docker** - Containerized Jenkins with AWS CLI, Terraform, and Ansible
+- **Jenkins** - Pipeline automation and CI/CD orchestration
+- **AWS** - Cloud infrastructure provider
+- **Terraform** - Infrastructure as Code
+- **Ansible** - Configuration management
 - **Terraform** - Infrastructure as Code for Azure
 - **Ansible** - Configuration management and deployment
 - **Azure** - Cloud infrastructure

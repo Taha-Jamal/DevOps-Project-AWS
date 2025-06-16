@@ -1,11 +1,9 @@
 pipeline {
     agent any
-    
-    environment {
-        ARM_SUBSCRIPTION_ID = credentials('AZURE_SUBSCRIPTION_ID')
-        ARM_CLIENT_ID = credentials('AZURE_CLIENT_ID')
-        ARM_CLIENT_SECRET = credentials('AZURE_CLIENT_SECRET')
-        ARM_TENANT_ID = credentials('AZURE_TENANT_ID')
+      environment {
+        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+        AWS_DEFAULT_REGION = 'us-east-1'
         TF_IN_AUTOMATION = 'true'
     }
 
@@ -66,119 +64,60 @@ pipeline {
                 }
             }
         }
-        
-        stage('Wait for VM') {
+
+        stage('Update Ansible Inventory') {
             steps {
                 script {
-                    def maxRetries = 20
-                    def publicIP = ""
-                    def sshReady = false
-                    
-                    // Wait for IP assignment
-                    echo "Waiting for public IP assignment..."
-                    for (int i = 0; i < maxRetries && !publicIP; i++) {
-                        sleep(time: 30, unit: 'SECONDS')
-                        publicIP = sh(
-                            script: "cd terraform && terraform output -raw public_ip_address",
+                    dir('terraform') {
+                        def publicIP = sh(
+                            script: 'terraform output -raw public_ip',
                             returnStdout: true
                         ).trim()
                         
-                        if (publicIP) {
-                            echo "Public IP found: ${publicIP}"
-                        } else {
-                            echo "Waiting for public IP assignment (attempt ${i + 1}/${maxRetries})"
-                        }
+                        // Update Ansible inventory with the new IP
+                        sh """
+                            echo "[webserver]
+${publicIP} ansible_user=ubuntu ansible_ssh_private_key_file=../jenkins_ssh_key" > ../ansible/inventory.ini
+                        """
                     }
-                    
-                    if (!publicIP) {
-                        error "Failed to get public IP after ${maxRetries} attempts"
-                    }
-
-                    // Wait for SSH to be ready
-                    echo "Waiting for SSH to be ready..."
-                    for (int i = 0; i < maxRetries && !sshReady; i++) {
-                        sleep(time: 30, unit: 'SECONDS')
-                        // Ensure key permissions before each attempt
-                        sh 'chmod 600 jenkins_ssh_key'
-                        def sshTest = sh(
-                            script: """
-                                ssh -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking=no -i jenkins_ssh_key adminuser@${publicIP} echo 'SSH connection test'
-                            """,
-                            returnStatus: true
-                        )
-                        if (sshTest == 0) {
-                            echo "SSH is ready!"
-                            sshReady = true
-                        } else {
-                            echo "Waiting for SSH to be ready (attempt ${i + 1}/${maxRetries})"
-                        }
-                    }
-                    
-                    if (!sshReady) {
-                        error "SSH did not become ready after ${maxRetries} attempts"
-                    }
-
-                    // Final wait to ensure system is fully booted
-                    sleep(time: 60, unit: 'SECONDS')
                 }
             }
         }
-        
-        stage('Run Ansible') {
+
+        stage('Wait for SSH') {
             steps {
                 script {
                     def publicIP = sh(
-                        script: "cd terraform && terraform output -raw public_ip_address",
+                        script: 'cd terraform && terraform output -raw public_ip',
                         returnStdout: true
                     ).trim()
                     
-                    if (!publicIP) {
-                        error "Could not get VM's public IP address"
-                    }
-                    
-                    // Create inventory file
-                    writeFile file: 'inventory.ini', text: """[webserver]
-${publicIP} ansible_ssh_user=adminuser ansible_ssh_private_key_file=${WORKSPACE}/jenkins_ssh_key ansible_host_key_checking=False"""
-                    
-                    // Show debug information
-                    sh '''
-                        echo "=== Debug Information ==="
-                        echo "Current directory:"
-                        pwd
-                        echo "Inventory file contents:"
-                        cat inventory.ini
-                        echo "SSH key permissions:"
-                        ls -l jenkins_ssh_key
-                    '''
-                    
-                    // Run Ansible playbook
-                    sh 'ansible-playbook -i inventory.ini -v ansible/install_web.yml'
+                    // Wait for SSH to become available
+                    sh """
+                        timeout 300 bash -c 'until ssh -o StrictHostKeyChecking=no -i jenkins_ssh_key ubuntu@${publicIP} echo Connected > /dev/null 2>&1; do sleep 5; done'
+                    """
                 }
             }
         }
-        
+
+        stage('Run Ansible') {
+            steps {
+                dir('ansible') {
+                    sh 'ansible-playbook -i inventory.ini install_web.yml'
+                }
+            }
+        }
+
         stage('Verify Deployment') {
             steps {
                 script {
                     def publicIP = sh(
-                        script: "cd terraform && terraform output -raw public_ip_address",
+                        script: 'cd terraform && terraform output -raw public_ip',
                         returnStdout: true
                     ).trim()
                     
-                    // Wait for web server to be ready
-                    sleep(time: 30, unit: 'SECONDS')
-                    
-                    // Test HTTP connection
-                    def httpTest = sh(
-                        script: "curl -s -f http://${publicIP}",
-                        returnStatus: true
-                    )
-                    
-                    if (httpTest == 0) {
-                        echo "Web server is accessible!"
-                    } else {
-                        error "Failed to access web server"
-                    }
+                    // Test the website
+                    sh "curl -s -f http://${publicIP}"
                 }
             }
         }
@@ -193,6 +132,12 @@ ${publicIP} ansible_ssh_user=adminuser ansible_ssh_private_key_file=${WORKSPACE}
         }
         failure {
             echo 'Pipeline failed! Check logs for details.'
+            dir('terraform') {
+                sh 'terraform destroy -auto-approve || true'
+            }
+        }
+        cleanup {
+            cleanWs()
         }
     }
 }

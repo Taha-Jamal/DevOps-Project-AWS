@@ -1,35 +1,29 @@
-variable "resource_group_name" {
-  description = "Name of the Azure Resource Group"
+variable "aws_region" {
+  description = "AWS region to deploy resources"
   type        = string
-  default     = "jenkins-pipeline-rg"
+  default     = "us-east-1"
 }
 
-variable "location" {
-  description = "Azure region to deploy resources"
+variable "instance_name" {
+  description = "Name of the EC2 instance"
   type        = string
-  default     = "East US"
+  default     = "webserver"
 }
 
-variable "vm_name" {
-  description = "Name of the virtual machine"
+variable "instance_type" {
+  description = "Type of EC2 instance"
   type        = string
-  default     = "webserver-vm"
+  default     = "t2.micro"
 }
 
 variable "admin_username" {
-  description = "Administrator username for the VM"
+  description = "Administrator username for the instance"
   type        = string
-  default     = "adminuser"
+  default     = "ubuntu"
 }
 
 variable "public_key_path" {
   description = "Path to the public SSH key"
   type        = string
   default     = "../jenkins_ssh_key.pub"
-}
-
-variable "vm_size" {
-  description = "Size of the VM"
-  type        = string
-  default     = "Standard_B1s"
 }

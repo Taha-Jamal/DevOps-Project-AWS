@@ -1,1 +1,5 @@
+aws_region     = "us-east-1"
+instance_type  = "t2.micro"
+instance_name  = "webserver"
+admin_username = "ubuntu"
 public_key_path = "../jenkins_ssh_key.pub"

@@ -13,11 +13,14 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Azure CLI
-RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+# Install AWS CLI
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    ./aws/install && \
+    rm -rf aws awscliv2.zip
 
 # Install Terraform
-RUN curl -fsSL https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip -o terraform.zip \
+RUN curl -fsSL https://releases.hashicorp.com/terraform/1.12.2/terraform_1.12.2_linux_amd64.zip -o terraform.zip \
     && unzip terraform.zip \
     && mv terraform /usr/local/bin/ \
     && rm terraform.zip
@@ -36,7 +39,7 @@ RUN /opt/ansible_venv/bin/pip install --no-cache-dir ansible
 # Verify installations
 RUN terraform --version && \
     ansible --version && \
-    az --version
+    aws --version
 
 # Switch back to Jenkins user
 USER jenkins

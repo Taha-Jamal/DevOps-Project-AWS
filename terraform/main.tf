@@ -1,130 +1,140 @@
 terraform {
   required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.0"
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.0"
     }
   }
 }
 
-provider "azurerm" {
-  features {}
+provider "aws" {
+  region = var.aws_region
 }
 
-# Create Resource Group
-resource "azurerm_resource_group" "rg" {
-  name     = var.resource_group_name
-  location = var.location
-}
+# Create VPC
+resource "aws_vpc" "main" {
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_hostnames = true
+  enable_dns_support   = true
 
-# Create Virtual Network
-resource "azurerm_virtual_network" "vnet" {
-  name                = "webserver-vnet"
-  address_space       = ["10.0.0.0/16"]
-  location           = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-}
-
-# Create Subnet
-resource "azurerm_subnet" "subnet" {
-  name                 = "webserver-subnet"
-  resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["10.0.1.0/24"]
-}
-
-# Create Public IP
-resource "azurerm_public_ip" "public_ip" {
-  name                = "webserver-public-ip"
-  location           = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  allocation_method   = "Dynamic"
-}
-
-# Create Network Security Group
-resource "azurerm_network_security_group" "nsg" {
-  name                = "webserver-nsg"
-  location           = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-
-  security_rule {
-    name                       = "HTTP"
-    priority                   = 1001
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "80"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  security_rule {
-    name                       = "SSH"
-    priority                   = 1002
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "22"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
+  tags = {
+    Name = "webserver-vpc"
   }
 }
 
-# Create Network Interface
-resource "azurerm_network_interface" "nic" {
-  name                = "webserver-nic"
-  location           = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
+# Create Internet Gateway
+resource "aws_internet_gateway" "main" {
+  vpc_id = aws_vpc.main.id
 
-  ip_configuration {
-    name                          = "internal"
-    subnet_id                     = azurerm_subnet.subnet.id
-    private_ip_address_allocation = "Dynamic"
-    public_ip_address_id         = azurerm_public_ip.public_ip.id
+  tags = {
+    Name = "webserver-igw"
   }
 }
 
-# Associate NSG with Network Interface
-resource "azurerm_network_interface_security_group_association" "nsg_association" {
-  network_interface_id      = azurerm_network_interface.nic.id
-  network_security_group_id = azurerm_network_security_group.nsg.id
+# Create Public Subnet
+resource "aws_subnet" "public" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "${var.aws_region}a"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "webserver-subnet"
+  }
 }
 
-# Create Virtual Machine
-resource "azurerm_linux_virtual_machine" "vm" {
-  name                = var.vm_name
-  resource_group_name = azurerm_resource_group.rg.name
-  location           = azurerm_resource_group.rg.location
-  size               = var.vm_size
-  admin_username     = var.admin_username
+# Create Route Table
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
 
-  network_interface_ids = [
-    azurerm_network_interface.nic.id,
-  ]
-
-  admin_ssh_key {
-    username   = var.admin_username
-    public_key = file(var.public_key_path)
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.main.id
   }
 
-  os_disk {
-    caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
+  tags = {
+    Name = "webserver-rt"
+  }
+}
+
+# Associate Route Table with Subnet
+resource "aws_route_table_association" "public" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.public.id
+}
+
+# Create Security Group
+resource "aws_security_group" "webserver" {
+  name        = "webserver-sg"
+  description = "Security group for web server"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTP"
   }
 
-  source_image_reference {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-focal"
-    sku       = "20_04-lts"
-    version   = "latest"
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "SSH"
   }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "webserver-sg"
+  }
+}
+
+# Get latest Ubuntu AMI
+data "aws_ami" "ubuntu" {
+  most_recent = true
+  owners      = ["099720109477"] # Canonical
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+# Create EC2 Instance
+resource "aws_instance" "webserver" {
+  ami                    = data.aws_ami.ubuntu.id
+  instance_type          = var.instance_type
+  subnet_id              = aws_subnet.public.id
+  vpc_security_group_ids = [aws_security_group.webserver.id]
+  key_name              = aws_key_pair.webserver.key_name
+
+  tags = {
+    Name = var.instance_name
+  }
+}
+
+# Create Key Pair
+resource "aws_key_pair" "webserver" {
+  key_name   = "webserver-key"
+  public_key = file(var.public_key_path)
 }
 
 # Output the public IP
-output "public_ip_address" {
-  value = azurerm_public_ip.public_ip.ip_address
+output "public_ip" {
+  value = aws_instance.webserver.public_ip
 }
 
 # Output the VM name
