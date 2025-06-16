@@ -2,6 +2,7 @@
 
 This project implements a fully automated DevOps pipeline using Jenkins (in Docker) that provisions AWS infrastructure with Terraform, configures it with Ansible, and deploys a static web application. This README documents both the setup process and implementation details.
 
+![Project Diagram](DevOps-Project.png)
 
 ## 🚀 Technology Stack
 
@@ -12,7 +13,6 @@ This project implements a fully automated DevOps pipeline using Jenkins (in Dock
 - **Ansible** - Configuration management
 - **Terraform** - Infrastructure as Code for Azure
 - **Ansible** - Configuration management and deployment
-- **Azure** - Cloud infrastructure
 - **Git** - Version control
 
 ## 📁 Project Structure
@@ -28,12 +28,10 @@ project/
 ├── app/
 │   └── index.html      # Static web application
 ├── logs/               # Execution logs for debugging
-│   ├── 22nd Build Success.txt
-│   └── 25th Build Success.txt
 ├── Screenshots/
 ├── Dockerfile          # Custom Jenkins image with tools
 ├── Jenkinsfile        # Pipeline definition
-├── Project.png
+├── DevOps-Project.png
 └── .gitignore        # Git ignore patterns
 ```
 

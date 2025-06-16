@@ -1,0 +1,763 @@
+Started by user awsuser
+Obtained Jenkinsfile from git https://github.com/Taha-Jamal/DevOps-Project-AWS.git
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/jenkins_home/workspace/aws-web-deploy
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+Cloning the remote Git repository
+Cloning repository https://github.com/Taha-Jamal/DevOps-Project-AWS.git
+ > git init /var/jenkins_home/workspace/aws-web-deploy # timeout=10
+Fetching upstream changes from https://github.com/Taha-Jamal/DevOps-Project-AWS.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.39.5'
+ > git fetch --tags --force --progress -- https://github.com/Taha-Jamal/DevOps-Project-AWS.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git config remote.origin.url https://github.com/Taha-Jamal/DevOps-Project-AWS.git # timeout=10
+ > git config --add remote.origin.fetch +refs/heads/*:refs/remotes/origin/* # timeout=10
+Avoid second fetch
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+Checking out Revision a1e9e2a5f7d7d3f6f2d898c2e85f5eb423be949d (refs/remotes/origin/main)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f a1e9e2a5f7d7d3f6f2d898c2e85f5eb423be949d # timeout=10
+Commit message: "Fix: Updated outputs for AWS in main.tf"
+ > git rev-list --no-walk 9e9b9d3a21a0b2387429e30f5fa41d458e92dfab # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] withCredentials
+Masking supported pattern matches of $AWS_ACCESS_KEY_ID or $AWS_SECRET_ACCESS_KEY
+[Pipeline] {
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Setup SSH Key)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ rm -f jenkins_ssh_key jenkins_ssh_key.pub
+[Pipeline] withCredentials
+Masking supported pattern matches of $SSH_KEY_FILE
+[Pipeline] {
+[Pipeline] sh
++ cp **** jenkins_ssh_key
++ chmod 600 jenkins_ssh_key
++ ls -l jenkins_ssh_key
+-rw------- 1 jenkins jenkins 3370 Jun 16 14:22 jenkins_ssh_key
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] withCredentials
+Masking supported pattern matches of $SSH_KEY_PUB_FILE
+[Pipeline] {
+[Pipeline] sh
++ cp **** jenkins_ssh_key.pub
++ chmod 644 jenkins_ssh_key.pub
++ ls -l jenkins_ssh_key.pub
+-rw-r--r-- 1 jenkins jenkins 737 Jun 16 14:22 jenkins_ssh_key.pub
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Checkout)
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/jenkins_home/workspace/aws-web-deploy/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/Taha-Jamal/DevOps-Project-AWS.git # timeout=10
+Fetching upstream changes from https://github.com/Taha-Jamal/DevOps-Project-AWS.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.39.5'
+ > git fetch --tags --force --progress -- https://github.com/Taha-Jamal/DevOps-Project-AWS.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+Checking out Revision a1e9e2a5f7d7d3f6f2d898c2e85f5eb423be949d (refs/remotes/origin/main)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f a1e9e2a5f7d7d3f6f2d898c2e85f5eb423be949d # timeout=10
+Commit message: "Fix: Updated outputs for AWS in main.tf"
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Terraform Init)
+[Pipeline] dir
+Running in /var/jenkins_home/workspace/aws-web-deploy/terraform
+[Pipeline] {
+[Pipeline] sh
++ terraform init -no-color
+Initializing the backend...
+Initializing provider plugins...
+- Finding hashicorp/aws versions matching "~> 4.0"...
+- Installing hashicorp/aws v4.67.0...
+- Installed hashicorp/aws v4.67.0 (signed by HashiCorp)
+Terraform has created a lock file .terraform.lock.hcl to record the provider
+selections it made above. Include this file in your version control repository
+so that Terraform can guarantee to make the same selections by default when
+you run "terraform init" in the future.
+
+Terraform has been successfully initialized!
+[Pipeline] }
+[Pipeline] // dir
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Terraform Plan)
+[Pipeline] dir
+Running in /var/jenkins_home/workspace/aws-web-deploy/terraform
+[Pipeline] {
+[Pipeline] sh
++ terraform plan -no-color -out=tfplan
+data.aws_ami.ubuntu: Reading...
+data.aws_ami.ubuntu: Read complete after 1s [id=ami-054d6a336762e438e]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # aws_instance.webserver will be created
+  + resource "aws_instance" "webserver" {
+      + ami                                  = "ami-054d6a336762e438e"
+      + arn                                  = (known after apply)
+      + associate_public_ip_address          = (known after apply)
+      + availability_zone                    = (known after apply)
+      + cpu_core_count                       = (known after apply)
+      + cpu_threads_per_core                 = (known after apply)
+      + disable_api_stop                     = (known after apply)
+      + disable_api_termination              = (known after apply)
+      + ebs_optimized                        = (known after apply)
+      + get_password_data                    = false
+      + host_id                              = (known after apply)
+      + host_resource_group_arn              = (known after apply)
+      + iam_instance_profile                 = (known after apply)
+      + id                                   = (known after apply)
+      + instance_initiated_shutdown_behavior = (known after apply)
+      + instance_state                       = (known after apply)
+      + instance_type                        = "t2.micro"
+      + ipv6_address_count                   = (known after apply)
+      + ipv6_addresses                       = (known after apply)
+      + key_name                             = "webserver-key"
+      + monitoring                           = (known after apply)
+      + outpost_arn                          = (known after apply)
+      + password_data                        = (known after apply)
+      + placement_group                      = (known after apply)
+      + placement_partition_number           = (known after apply)
+      + primary_network_interface_id         = (known after apply)
+      + private_dns                          = (known after apply)
+      + private_ip                           = (known after apply)
+      + public_dns                           = (known after apply)
+      + public_ip                            = (known after apply)
+      + secondary_private_ips                = (known after apply)
+      + security_groups                      = (known after apply)
+      + source_dest_check                    = true
+      + subnet_id                            = (known after apply)
+      + tags                                 = {
+          + "Name" = "webserver"
+        }
+      + tags_all                             = {
+          + "Name" = "webserver"
+        }
+      + tenancy                              = (known after apply)
+      + user_data                            = (known after apply)
+      + user_data_base64                     = (known after apply)
+      + user_data_replace_on_change          = false
+      + vpc_security_group_ids               = (known after apply)
+
+      + capacity_reservation_specification (known after apply)
+
+      + cpu_options (known after apply)
+
+      + ebs_block_device (known after apply)
+
+      + enclave_options (known after apply)
+
+      + ephemeral_block_device (known after apply)
+
+      + maintenance_options (known after apply)
+
+      + metadata_options (known after apply)
+
+      + network_interface (known after apply)
+
+      + private_dns_name_options (known after apply)
+
+      + root_block_device (known after apply)
+    }
+
+  # aws_internet_gateway.main will be created
+  + resource "aws_internet_gateway" "main" {
+      + arn      = (known after apply)
+      + id       = (known after apply)
+      + owner_id = (known after apply)
+      + tags     = {
+          + "Name" = "webserver-igw"
+        }
+      + tags_all = {
+          + "Name" = "webserver-igw"
+        }
+      + vpc_id   = (known after apply)
+    }
+
+  # aws_key_pair.webserver will be created
+  + resource "aws_key_pair" "webserver" {
+      + arn             = (known after apply)
+      + fingerprint     = (known after apply)
+      + id              = (known after apply)
+      + key_name        = "webserver-key"
+      + key_name_prefix = (known after apply)
+      + key_pair_id     = (known after apply)
+      + key_type        = (known after apply)
+      + public_key      = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDMo/F5kFyfSZ/Cfqhkz3BKq7Z06jmhVYICK/Pp/GNge53d98Uia9spvRqbswH/yz6B1CGlYN7IvV5brZYCuD8cPCESILGYGzc2dYPYTeycPinyH7zf4PTEnf3AlhTNNIIHD7muDpcsC8eWRqpmO02FHTmzN8FuZ6VYP3iE0gYEWsqXaDGaSWfcbSIjqrl5M7KxGiARzoIpYtnGevZNFCljWUBY1HjSV2tyCJjDhmEpeXGKplddrfWy+4FmhI2/ZVTzerQO6ks5deqgi9yioSIUyNTvz2qfekCWDQtNngz69mSl07BKQ9/Xzxlwawwap5voom5/yzox5sSI+de7jBIMcWg7d/UsPXp0betmoLTfh0ID6ufbi71VzVKSvfIenrPf0rFxSYswsoasCX11pKlw8UCLjZmDv43Xjn71Ttct1INppWd0hk0OUK4yfIjS5PnJ+ESZCvx9ogL3i6Wb8OOWxbN49XZIsUMgc3ReynXs5pRIYI9fA9RDoiBspzdN7oK5B10SLPhDGEYTf31K+umApNpycH34gd0AngpyZdymupRsbOIthf/uojpoTUVw0Z6Az8i8wFYKXzybQeis7pFT1cAOdLDnEn7KYauweJ9De5fcv3t59ZtT83oIUCpuwqwKVTziHM91nEoUkwl6KaAuYOspDyCVwssUx74pEoWBVQ== umera@Umer"
+      + tags_all        = (known after apply)
+    }
+
+  # aws_route_table.public will be created
+  + resource "aws_route_table" "public" {
+      + arn              = (known after apply)
+      + id               = (known after apply)
+      + owner_id         = (known after apply)
+      + propagating_vgws = (known after apply)
+      + route            = [
+          + {
+              + cidr_block                 = "0.0.0.0/0"
+              + gateway_id                 = (known after apply)
+                # (12 unchanged attributes hidden)
+            },
+        ]
+      + tags             = {
+          + "Name" = "webserver-rt"
+        }
+      + tags_all         = {
+          + "Name" = "webserver-rt"
+        }
+      + vpc_id           = (known after apply)
+    }
+
+  # aws_route_table_association.public will be created
+  + resource "aws_route_table_association" "public" {
+      + id             = (known after apply)
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # aws_security_group.webserver will be created
+  + resource "aws_security_group" "webserver" {
+      + arn                    = (known after apply)
+      + description            = "Security group for web server"
+      + egress                 = [
+          + {
+              + cidr_blocks      = [
+                  + "0.0.0.0/0",
+                ]
+              + from_port        = 0
+              + ipv6_cidr_blocks = []
+              + prefix_list_ids  = []
+              + protocol         = "-1"
+              + security_groups  = []
+              + self             = false
+              + to_port          = 0
+                # (1 unchanged attribute hidden)
+            },
+        ]
+      + id                     = (known after apply)
+      + ingress                = [
+          + {
+              + cidr_blocks      = [
+                  + "0.0.0.0/0",
+                ]
+              + description      = "HTTP"
+              + from_port        = 80
+              + ipv6_cidr_blocks = []
+              + prefix_list_ids  = []
+              + protocol         = "tcp"
+              + security_groups  = []
+              + self             = false
+              + to_port          = 80
+            },
+          + {
+              + cidr_blocks      = [
+                  + "0.0.0.0/0",
+                ]
+              + description      = "SSH"
+              + from_port        = 22
+              + ipv6_cidr_blocks = []
+              + prefix_list_ids  = []
+              + protocol         = "tcp"
+              + security_groups  = []
+              + self             = false
+              + to_port          = 22
+            },
+        ]
+      + name                   = "webserver-sg"
+      + name_prefix            = (known after apply)
+      + owner_id               = (known after apply)
+      + revoke_rules_on_delete = false
+      + tags                   = {
+          + "Name" = "webserver-sg"
+        }
+      + tags_all               = {
+          + "Name" = "webserver-sg"
+        }
+      + vpc_id                 = (known after apply)
+    }
+
+  # aws_subnet.public will be created
+  + resource "aws_subnet" "public" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1a"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.0.1.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = true
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Name" = "webserver-subnet"
+        }
+      + tags_all                                       = {
+          + "Name" = "webserver-subnet"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # aws_vpc.main will be created
+  + resource "aws_vpc" "main" {
+      + arn                                  = (known after apply)
+      + cidr_block                           = "10.0.0.0/16"
+      + default_network_acl_id               = (known after apply)
+      + default_route_table_id               = (known after apply)
+      + default_security_group_id            = (known after apply)
+      + dhcp_options_id                      = (known after apply)
+      + enable_classiclink                   = (known after apply)
+      + enable_classiclink_dns_support       = (known after apply)
+      + enable_dns_hostnames                 = true
+      + enable_dns_support                   = true
+      + enable_network_address_usage_metrics = (known after apply)
+      + id                                   = (known after apply)
+      + instance_tenancy                     = "default"
+      + ipv6_association_id                  = (known after apply)
+      + ipv6_cidr_block                      = (known after apply)
+      + ipv6_cidr_block_network_border_group = (known after apply)
+      + main_route_table_id                  = (known after apply)
+      + owner_id                             = (known after apply)
+      + tags                                 = {
+          + "Name" = "webserver-vpc"
+        }
+      + tags_all                             = {
+          + "Name" = "webserver-vpc"
+        }
+    }
+
+Plan: 8 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + instance_id = (known after apply)
+  + public_ip   = (known after apply)
+  + vpc_id      = (known after apply)
+[Pipeline] }
+[Pipeline] // dir
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Terraform Apply)
+[Pipeline] dir
+Running in /var/jenkins_home/workspace/aws-web-deploy/terraform
+[Pipeline] {
+[Pipeline] sh
++ terraform apply -no-color -auto-approve tfplan
+aws_key_pair.webserver: Creating...
+aws_vpc.main: Creating...
+aws_key_pair.webserver: Creation complete after 1s [id=webserver-key]
+aws_vpc.main: Still creating... [00m10s elapsed]
+aws_vpc.main: Creation complete after 15s [id=vpc-007a5d99e0913d472]
+aws_internet_gateway.main: Creating...
+aws_subnet.public: Creating...
+aws_security_group.webserver: Creating...
+aws_internet_gateway.main: Creation complete after 1s [id=igw-04afda35d7a3f6293]
+aws_route_table.public: Creating...
+aws_route_table.public: Creation complete after 2s [id=rtb-047a5fabc17edfef0]
+aws_security_group.webserver: Creation complete after 4s [id=sg-055c28613aa534f96]
+aws_subnet.public: Still creating... [00m10s elapsed]
+aws_subnet.public: Creation complete after 12s [id=subnet-00a720d6760bf04d7]
+aws_route_table_association.public: Creating...
+aws_instance.webserver: Creating...
+aws_route_table_association.public: Creation complete after 1s [id=rtbassoc-0b968db148439d49d]
+aws_instance.webserver: Still creating... [00m10s elapsed]
+aws_instance.webserver: Still creating... [00m20s elapsed]
+aws_instance.webserver: Still creating... [00m30s elapsed]
+aws_instance.webserver: Creation complete after 35s [id=i-0308db88302bc51a2]
+
+Apply complete! Resources: 8 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+instance_id = "i-0308db88302bc51a2"
+public_ip = "54.147.3.222"
+vpc_id = "vpc-007a5d99e0913d472"
+[Pipeline] }
+[Pipeline] // dir
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Update Ansible Inventory)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] dir
+Running in /var/jenkins_home/workspace/aws-web-deploy/terraform
+[Pipeline] {
+[Pipeline] sh
++ terraform output -raw public_ip
+[Pipeline] sh
++ echo [webserver]
+54.147.3.222 ansible_user=ubuntu ansible_ssh_private_key_file=../jenkins_ssh_key
+[Pipeline] }
+[Pipeline] // dir
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Wait for SSH)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ cd terraform
++ terraform output -raw public_ip
+[Pipeline] sh
++ timeout 300 bash -c until ssh -o StrictHostKeyChecking=no -i jenkins_ssh_key ubuntu@54.147.3.222 echo Connected > /dev/null 2>&1; do sleep 5; done
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Run Ansible)
+[Pipeline] dir
+Running in /var/jenkins_home/workspace/aws-web-deploy/ansible
+[Pipeline] {
+[Pipeline] sh
++ ansible-playbook -i inventory.ini install_web.yml
+
+PLAY [Install and configure web server] ****************************************
+
+TASK [Gathering Facts] *********************************************************
+[WARNING]: Platform linux on host 54.147.3.222 is using the discovered Python
+interpreter at /usr/bin/python3.8, but future installation of another Python
+interpreter could change the meaning of that path. See
+https://docs.ansible.com/ansible-
+core/2.18/reference_appendices/interpreter_discovery.html for more information.
+ok: [54.147.3.222]
+
+TASK [Update apt cache] ********************************************************
+changed: [54.147.3.222]
+
+TASK [Install Apache] **********************************************************
+changed: [54.147.3.222]
+
+TASK [Ensure Apache is running] ************************************************
+ok: [54.147.3.222]
+
+TASK [Remove default Apache page] **********************************************
+changed: [54.147.3.222]
+
+TASK [Copy custom website files] ***********************************************
+changed: [54.147.3.222]
+
+TASK [Ensure correct permissions on /var/www/html] *****************************
+changed: [54.147.3.222]
+
+TASK [Restart Apache] **********************************************************
+changed: [54.147.3.222]
+
+PLAY RECAP *********************************************************************
+54.147.3.222               : ok=8    changed=6    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+[Pipeline] }
+[Pipeline] // dir
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Verify Deployment)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ cd terraform
++ terraform output -raw public_ip
+[Pipeline] sh
++ curl -s -f http://54.147.3.222
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DevOps Pipeline Demo</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Arial", sans-serif;
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+      }
+
+      .container {
+        text-align: center;
+        max-width: 850px;
+        padding: 2.5rem;
+        background: rgba(255, 255, 255, 0.07);
+        border-radius: 20px;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      .subtitle {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        opacity: 0.95;
+      }
+
+      .tech-stack {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin: 2.5rem 0;
+      }
+
+      .tech-item {
+        background: rgba(255, 255, 255, 0.18);
+        padding: 1rem;
+        border-radius: 12px;
+        transition: transform 0.3s ease;
+      }
+
+      .tech-item:hover {
+        transform: translateY(-6px);
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .tech-item h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .success-message {
+        background: rgba(76, 175, 80, 0.25);
+        border: 2px solid rgba(76, 175, 80, 0.5);
+        padding: 1rem;
+        border-radius: 12px;
+        margin: 2rem 0;
+      }
+
+      .pipeline-info {
+        background: rgba(0, 150, 136, 0.3);
+        border: 2px solid rgba(0, 150, 136, 0.6);
+        padding: 1rem;
+        border-radius: 12px;
+        margin: 2rem 0;
+      }
+
+      .footer {
+        margin-top: 2rem;
+        font-size: 0.9rem;
+        opacity: 0.85;
+      }
+
+      .student-info {
+        background: rgba(255, 255, 255, 0.15);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin: 2rem 0;
+        text-align: left;
+      }
+
+      .student-info h2 {
+        text-align: center;
+        margin-bottom: 1rem;
+        color: #fff;
+        text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+      }
+
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        font-size: 1rem;
+      }
+
+      .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .info-label {
+        font-weight: bold;
+        color: #ffd700;
+      }
+
+      .info-value {
+        color: #fff;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .pulse {
+        animation: pulse 2s infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="pulse">🚀 DevOps Pipeline Success!</h1>
+      <p class="subtitle">Fully Automated Infrastructure Deployment</p>
+
+      <div class="student-info">
+        <h2>👨‍🎓 Student Information</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Name:</span>
+            <span class="info-value" style="display:block; width:100%; text-align:center;">Umer Amir</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Registration #:</span>
+            <span class="info-value" style="display:block; width:100%; text-align:center;">2112241</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Section:</span>
+            <span class="info-value" style="display:block; width:100%; text-align:center;">A</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Course:</span>
+            <span class="info-value" style="display:block; width:100%; text-align:center;">DevOps</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Instructor:</span>
+            <span class="info-value" style="display:block; width:100%; text-align:center;">Tariq Khan Ghouri</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="success-message">
+        <h2>✅ Deployment Complete</h2>
+        <p>
+          Your web application has been successfully deployed using a fully
+          automated DevOps pipeline!
+        </p>
+      </div>
+
+      <div class="pipeline-info">
+        <h2>🔄 Pipeline Stages Completed</h2>
+        <ul style="list-style: none; padding: 0">
+          <li>✅ Jenkins Pipeline Triggered</li>
+          <li>✅ Terraform Infrastructure Provisioned</li>
+          <li>✅ Azure VM Created and Configured</li>
+          <li>✅ Ansible Web Server Installation</li>
+          <li>✅ Application Deployment</li>
+        </ul>
+      </div>
+
+      <div class="tech-stack">
+        <div class="tech-item">
+          <h3>🐳 Docker</h3>
+          <p>Jenkins containerization</p>
+        </div>
+        <div class="tech-item">
+          <h3>🏗️ Jenkins</h3>
+          <p>CI/CD Automation</p>
+        </div>
+        <div class="tech-item">
+          <h3>🏗️ Terraform</h3>
+          <p>Infrastructure as Code</p>
+        </div>
+        <div class="tech-item">
+          <h3>⚙️ Ansible</h3>
+          <p>Configuration Management</p>
+        </div>
+        <div class="tech-item">
+          <h3>☁️ Azure</h3>
+          <p>Cloud Platform</p>
+        </div>
+        <div class="tech-item">
+          <h3>📚 Git</h3>
+          <p>Version Control</p>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>Deployed on: <span id="deploy-time"></span></p>
+        <p>Server: Ubuntu 22.04 LTS | Web Server: Apache2</p>
+      </div>
+    </div>
+
+    <script>
+      document.getElementById("deploy-time").textContent =
+        new Date().toLocaleString();
+    </script>
+  </body>
+</html>
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] sh
++ rm -f jenkins_ssh_key jenkins_ssh_key.pub
+[Pipeline] echo
+Pipeline completed successfully!
+[Pipeline] cleanWs
+[WS-CLEANUP] Deleting project workspace...
+[WS-CLEANUP] Deferred wipeout is used...
+[WS-CLEANUP] done
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS
