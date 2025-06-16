@@ -11,7 +11,7 @@ This project implements a fully automated DevOps pipeline using Jenkins (in Dock
 - **AWS** - Cloud infrastructure provider
 - **Terraform** - Infrastructure as Code
 - **Ansible** - Configuration management
-- **Terraform** - Infrastructure as Code for Azure
+- **Terraform** - Infrastructure as Code 
 - **Ansible** - Configuration management and deployment
 - **Git** - Version control
 
@@ -20,7 +20,7 @@ This project implements a fully automated DevOps pipeline using Jenkins (in Dock
 ```
 project/
 ├── terraform/
-│   ├── main.tf          # Azure infrastructure configuration
+│   ├── main.tf          # AWS infrastructure configuration
 │   ├── variables.tf     # Terraform variable definitions
 │   └── terraform.tfvars # Variable values (gitignored)
 ├── ansible/
@@ -40,7 +40,7 @@ project/
 ### Prerequisites
 
 - Windows machine with Docker Desktop
-- Azure subscription
+- AWS subscription
 - GitHub account
 - VS Code (recommended)
 
@@ -59,13 +59,7 @@ project/
    ssh-keygen -t rsa -b 4096 -f ./ssh_key -N ""
    ```
 
-3. Create Azure Service Principal:
-
-   ```bash
-   az ad sp create-for-rbac --name "DevOpsPipeline" --role contributor
-   ```
-
-4. Build and start Jenkins container:
+3. Build and start Jenkins container:
 
    ```bash
    docker build -t jenkins-devops .
@@ -75,11 +69,11 @@ project/
      jenkins-devops
    ```
 
-5. Configure Jenkins:
+4. Configure Jenkins:
    - Install suggested plugins
    - Create pipeline job pointing to your repository
    - Add credentials:
-     - Azure service principal (as Secret text)
+     - Amazon AWS  (as Secret text)
      - SSH private key (as Secret file)
 
 ## 📊 Logging and Debugging
@@ -140,7 +134,7 @@ You can check these logs at any time during or after pipeline execution to under
 
 - **Challenge**: Jenkins container couldn't properly communicate with Terraform through WSL
 - **Solution**:
-  - Created custom Dockerfile to package all tools (Terraform, Ansible, Azure CLI) directly in the container
+  - Created custom Dockerfile to package all tools (Terraform, Ansible, AWS CLI) directly in the container
   - Eliminated dependency on WSL-based tool execution
   - Added proper environment setup in Dockerfile
   - Ensured all tools run natively within the container
@@ -151,10 +145,10 @@ You can check these logs at any time during or after pipeline execution to under
 
 2. Set up required credentials in Jenkins:
 
-   - `AZURE_CLIENT_ID`
-   - `AZURE_CLIENT_SECRET`
-   - `AZURE_SUBSCRIPTION_ID`
-   - `AZURE_TENANT_ID`
+   - `AWS_CLIENT_ID`
+   - `AWS_CLIENT_SECRET`
+   - `AWS_SUBSCRIPTION_ID`
+   - `AWS_TENANT_ID`
    - `SSH_PRIVATE_KEY`
 
 3. Create a new pipeline job:
@@ -166,7 +160,7 @@ You can check these logs at any time during or after pipeline execution to under
 
 The pipeline will:
 
-1. Authenticate with Azure
+1. Authenticate with AWS
 2. Provision VM using Terraform
 3. Wait for VM to be ready
 4. Configure web server using Ansible
@@ -208,7 +202,7 @@ Feel free to submit issues and enhancement requests!
 
 2. If Terraform fails:
 
-   - Check Azure credentials
+   - Check AWS credentials
    - Verify resource name availability
    - Check quota limits
 
