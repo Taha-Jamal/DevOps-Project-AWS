@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DevOps Pipeline Demo</title>
+    <title>DevOps Deployment Summary</title>
     <style>
       * {
         margin: 0;
@@ -12,226 +12,187 @@
       }
 
       body {
-        font-family: "Arial", sans-serif;
-        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #0f2027;
+        background-image: linear-gradient(to right, #2c5364, #203a43, #0f2027);
+        color: #fff;
         display: flex;
-        align-items: center;
         justify-content: center;
-        color: white;
+        align-items: flex-start;
+        min-height: 100vh;
+        padding: 2rem;
       }
 
-      .container {
-        text-align: center;
-        max-width: 850px;
-        padding: 2.5rem;
-        background: rgba(255, 255, 255, 0.07);
+      .card {
+        background-color: #1c1c1e;
         border-radius: 20px;
-        backdrop-filter: blur(8px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 2rem;
+        max-width: 900px;
+        width: 100%;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
       }
 
       h1 {
-        font-size: 3rem;
+        font-size: 2.8rem;
         margin-bottom: 1rem;
-        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+        color: #00ffff;
+        text-align: center;
       }
 
       .subtitle {
+        text-align: center;
         font-size: 1.2rem;
         margin-bottom: 2rem;
-        opacity: 0.95;
+        color: #aaa;
       }
 
-      .tech-stack {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-        margin: 2.5rem 0;
-      }
-
-      .tech-item {
-        background: rgba(255, 255, 255, 0.18);
+      .highlight-box {
+        background-color: #2e2e30;
         padding: 1rem;
-        border-radius: 12px;
-        transition: transform 0.3s ease;
+        border-left: 5px solid #00ffff;
+        margin: 1rem 0;
+        border-radius: 10px;
       }
 
-      .tech-item:hover {
-        transform: translateY(-6px);
-        background: rgba(255, 255, 255, 0.3);
-      }
-
-      .tech-item h3 {
-        font-size: 1.1rem;
-        margin-bottom: 0.5rem;
-      }
-
-      .success-message {
-        background: rgba(76, 175, 80, 0.25);
-        border: 2px solid rgba(76, 175, 80, 0.5);
-        padding: 1rem;
-        border-radius: 12px;
-        margin: 2rem 0;
-      }
-
-      .pipeline-info {
-        background: rgba(0, 150, 136, 0.3);
-        border: 2px solid rgba(0, 150, 136, 0.6);
-        padding: 1rem;
-        border-radius: 12px;
-        margin: 2rem 0;
-      }
-
-      .footer {
-        margin-top: 2rem;
-        font-size: 0.9rem;
-        opacity: 0.85;
-      }
-
-      .student-info {
-        background: rgba(255, 255, 255, 0.15);
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        padding: 1.5rem;
-        border-radius: 15px;
-        margin: 2rem 0;
-        text-align: left;
-      }
-
-      .student-info h2 {
-        text-align: center;
-        margin-bottom: 1rem;
-        color: #fff;
-        text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-      }
-
-      .info-grid {
+      .grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 1rem;
+        margin-top: 2rem;
+      }
+
+      .box {
+        background-color: #2d2d2f;
+        border: 1px solid #00ffff44;
+        padding: 1rem;
+        border-radius: 12px;
+        text-align: center;
+      }
+
+      .box h3 {
+        color: #00ffff;
+        margin-bottom: 0.5rem;
+      }
+
+      .info-table {
+        margin-top: 2rem;
+        border: 1px solid #444;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th, td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #444;
+        text-align: left;
+      }
+
+      th {
+        background-color: #00ffff22;
+        color: #00ffff;
+      }
+
+      .footer {
+        text-align: center;
+        font-size: 0.9rem;
+        margin-top: 2rem;
+        color: #bbb;
+      }
+
+      button {
+        margin-top: 1.5rem;
+        padding: 0.6rem 1.2rem;
         font-size: 1rem;
+        background: #00ffff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        color: #000;
+        transition: background 0.3s ease;
       }
 
-      .info-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 0.5rem 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-      }
-
-      .info-label {
-        font-weight: bold;
-        color: #ffd700;
-      }
-
-      .info-value {
-        color: #fff;
-      }
-
-      @keyframes pulse {
-        0% {
-          transform: scale(1);
-        }
-        50% {
-          transform: scale(1.05);
-        }
-        100% {
-          transform: scale(1);
-        }
-      }
-
-      .pulse {
-        animation: pulse 2s infinite;
+      button:hover {
+        background: #00cccc;
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <h1 class="pulse">🚀 DevOps Pipeline Success!</h1>
-      <p class="subtitle">Fully Automated Infrastructure Deployment</p>
+    <div class="card">
+      <h1>🚀 Deployment Complete</h1>
+      <p class="subtitle">DevOps Pipeline Execution Summary</p>
 
-      <div class="student-info">
-        <h2>👨‍🎓 Student Information</h2>
-        <div class="info-grid">
-          <div class="info-item">
-            <span class="info-label">Name:</span>
-            <span class="info-value" style="display:block; width:100%; text-align:center;">Umer Amir</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Registration #:</span>
-            <span class="info-value" style="display:block; width:100%; text-align:center;">2112241</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Section:</span>
-            <span class="info-value" style="display:block; width:100%; text-align:center;">A</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Course:</span>
-            <span class="info-value" style="display:block; width:100%; text-align:center;">DevOps</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Instructor:</span>
-            <span class="info-value" style="display:block; width:100%; text-align:center;">Tariq Khan Ghouri</span>
-          </div>
+      <div class="highlight-box">
+        <strong>Project Overview:</strong> Infrastructure provisioned using Jenkins, Terraform, and Ansible; deployed on Azure.
+      </div>
+
+      <div class="info-table">
+        <table>
+          <tr>
+            <th>Name</th>
+            <td>M. Taha Jamal</td>
+          </tr>
+          <tr>
+            <th>Registration #</th>
+            <td>2112244</td>
+          </tr>
+          <tr>
+            <th>Section</th>
+            <td>A</td>
+          </tr>
+          <tr>
+            <th>Course</th>
+            <td>DevOps</td>
+          </tr>
+          <tr>
+            <th>Instructor</th>
+            <td>Tariq Khan Ghouri</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="grid">
+        <div class="box">
+          <h3>🔧 Jenkins</h3>
+          <p>CI/CD Orchestration</p>
         </div>
-      </div>
-
-      <div class="success-message">
-        <h2>✅ Deployment Complete</h2>
-        <p>
-          Your web application has been successfully deployed using a fully
-          automated DevOps pipeline!
-        </p>
-      </div>
-
-      <div class="pipeline-info">
-        <h2>🔄 Pipeline Stages Completed</h2>
-        <ul style="list-style: none; padding: 0">
-          <li>✅ Jenkins Pipeline Triggered</li>
-          <li>✅ Terraform Infrastructure Provisioned</li>
-          <li>✅ Azure VM Created and Configured</li>
-          <li>✅ Ansible Web Server Installation</li>
-          <li>✅ Application Deployment</li>
-        </ul>
-      </div>
-
-      <div class="tech-stack">
-        <div class="tech-item">
+        <div class="box">
+          <h3>🏗 Terraform</h3>
+          <p>Provisioning Azure Infrastructure</p>
+        </div>
+        <div class="box">
+          <h3>⚙ Ansible</h3>
+          <p>Automated Server Configuration</p>
+        </div>
+        <div class="box">
           <h3>🐳 Docker</h3>
-          <p>Jenkins containerization</p>
+          <p>Containerized Jenkins</p>
         </div>
-        <div class="tech-item">
-          <h3>🏗️ Jenkins</h3>
-          <p>CI/CD Automation</p>
+        <div class="box">
+          <h3>☁ Azure</h3>
+          <p>Cloud Environment</p>
         </div>
-        <div class="tech-item">
-          <h3>🏗️ Terraform</h3>
-          <p>Infrastructure as Code</p>
-        </div>
-        <div class="tech-item">
-          <h3>⚙️ Ansible</h3>
-          <p>Configuration Management</p>
-        </div>
-        <div class="tech-item">
-          <h3>☁️ Azure</h3>
-          <p>Cloud Platform</p>
-        </div>
-        <div class="tech-item">
-          <h3>📚 Git</h3>
-          <p>Version Control</p>
+        <div class="box">
+          <h3>📂 Git</h3>
+          <p>Source Versioning</p>
         </div>
       </div>
 
       <div class="footer">
-        <p>Deployed on: <span id="deploy-time"></span></p>
-        <p>Server: Ubuntu 22.04 LTS | Web Server: Apache2</p>
+        Deployed on: <span id="deploy-time"></span> | Server: Ubuntu 22.04, Apache2
+      </div>
+
+      <div style="text-align: center;">
+        <button onclick="window.location.reload()">↻ Refresh</button>
       </div>
     </div>
 
     <script>
-      document.getElementById("deploy-time").textContent =
-        new Date().toLocaleString();
+      document.getElementById("deploy-time").textContent = new Date().toLocaleString();
     </script>
   </body>
 </html>
