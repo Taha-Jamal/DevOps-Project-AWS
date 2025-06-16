@@ -132,17 +132,18 @@ resource "aws_key_pair" "webserver" {
   public_key = file(var.public_key_path)
 }
 
-# Output the public IP
+# Outputs
 output "public_ip" {
   value = aws_instance.webserver.public_ip
+  description = "The public IP address of the web server"
 }
 
-# Output the VM name
-output "vm_name" {
-  value = azurerm_linux_virtual_machine.vm.name
+output "instance_id" {
+  value = aws_instance.webserver.id
+  description = "The instance ID of the web server"
 }
 
-# Output the resource group name
-output "resource_group_name" {
-  value = azurerm_resource_group.rg.name
+output "vpc_id" {
+  value = aws_vpc.main.id
+  description = "The ID of the VPC"
 }
