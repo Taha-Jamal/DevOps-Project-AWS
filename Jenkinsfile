@@ -14,8 +14,8 @@ pipeline {
                     // Clean up any existing keys
                     sh 'rm -f jenkins_ssh_key jenkins_ssh_key.pub'
                     
-                    // Write the SSH private key with correct permissions
-                    withCredentials([file(credentialsId: 'jenkins_ssh_key', variable: 'SSH_KEY_FILE')]) {
+                // Write the SSH private key with correct permissions
+                    withCredentials([sshUserPrivateKey(credentialsId: 'jenkins_ssh_key', keyFileVariable: 'SSH_KEY_FILE')]) {
                         sh """
                             cp "\$SSH_KEY_FILE" jenkins_ssh_key
                             chmod 600 jenkins_ssh_key
