@@ -119,16 +119,16 @@ resource "aws_instance" "webserver" {
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.webserver.id]
-  key_name              = aws_key_pair.webserver.key_name
+  key_name              = aws_key_pair.webserver.key_name  # This will use the dynamic key name
 
   tags = {
     Name = var.instance_name
   }
 }
 
-# Create Key Pair
+# Create Key Pair with timestamp to avoid conflicts
 resource "aws_key_pair" "webserver" {
-  key_name   = "webserver-key"
+  key_name   = "webserver-key-${formatdate("YYYYMMDD-HHmmss", timestamp())}"
   public_key = file(var.public_key_path)
 }
 
